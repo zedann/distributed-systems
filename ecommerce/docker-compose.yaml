@@ -106,6 +106,20 @@ services:
       - etcd2
       - etcd3
 
+    # =========================================================
+    # HAPROXY
+    # =========================================================
+  haproxy:
+    image: haproxy:3.2
+    container_name: haproxy
+    volumes:
+      - ./docker/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    ports:
+      - "5435:5432"
+    depends_on:
+      - postgres1
+      - postgres2
+      - postgres3
 volumes:
   etcd1_data:
   etcd2_data:

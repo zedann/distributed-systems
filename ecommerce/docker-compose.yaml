@@ -116,10 +116,31 @@ services:
       - ./docker/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
     ports:
       - "5435:5432"
+      - "5436:5433"
     depends_on:
       - postgres1
       - postgres2
       - postgres3
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ecommerce-app
+    working_dir: /app
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: development
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: sh -lc "npm install && npm run dev"
+    depends_on:
+      - haproxy
+
 volumes:
   etcd1_data:
   etcd2_data:

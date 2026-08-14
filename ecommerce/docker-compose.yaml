@@ -1,76 +1,116 @@
 services:
-  postgres-primary:
-    image: postgres:17
-    container_name: postgres-primary
+  # =========================================================
+  # ETCD
+  # =========================================================
+
+  etcd1:
+    image: quay.io/coreos/etcd:v3.5.18
+    container_name: etcd1
+    command:
+      - /usr/local/bin/etcd
+      - --name=etcd1
+      - --data-dir=/etcd-data
+      - --listen-client-urls=http://0.0.0.0:2379
+      - --advertise-client-urls=http://etcd1:2379
+      - --listen-peer-urls=http://0.0.0.0:2380
+      - --initial-advertise-peer-urls=http://etcd1:2380
+      - --initial-cluster=etcd1=http://etcd1:2380,etcd2=http://etcd2:2380,etcd3=http://etcd3:2380
+      - --initial-cluster-state=new
+      - --initial-cluster-token=ecommerce-etcd
+    volumes:
+      - etcd1_data:/etcd-data
+
+  etcd2:
+    image: quay.io/coreos/etcd:v3.5.18
+    container_name: etcd2
+    command:
+      - /usr/local/bin/etcd
+      - --name=etcd2
+      - --data-dir=/etcd-data
+      - --listen-client-urls=http://0.0.0.0:2379
+      - --advertise-client-urls=http://etcd2:2379
+      - --listen-peer-urls=http://0.0.0.0:2380
+      - --initial-advertise-peer-urls=http://etcd2:2380
+      - --initial-cluster=etcd1=http://etcd1:2380,etcd2=http://etcd2:2380,etcd3=http://etcd3:2380
+      - --initial-cluster-state=new
+      - --initial-cluster-token=ecommerce-etcd
+    volumes:
+      - etcd2_data:/etcd-data
+
+  etcd3:
+    image: quay.io/coreos/etcd:v3.5.18
+    container_name: etcd3
+    command:
+      - /usr/local/bin/etcd
+      - --name=etcd3
+      - --data-dir=/etcd-data
+      - --listen-client-urls=http://0.0.0.0:2379
+      - --advertise-client-urls=http://etcd3:2379
+      - --listen-peer-urls=http://0.0.0.0:2380
+      - --initial-advertise-peer-urls=http://etcd3:2380
+      - --initial-cluster=etcd1=http://etcd1:2380,etcd2=http://etcd2:2380,etcd3=http://etcd3:2380
+      - --initial-cluster-state=new
+      - --initial-cluster-token=ecommerce-etcd
+    volumes:
+      - etcd3_data:/etcd-data
+
+  # =========================================================
+  # POSTGRESQL + PATRONI
+  # =========================================================
+
+  postgres1:
+    build:
+      context: ./docker/patroni
+    container_name: postgres1
     environment:
-      POSTGRES_USER: ecommerce
-      POSTGRES_PASSWORD: ecommerce
-      POSTGRES_DB: ecommerce
+      PATRONI_NAME: postgres1
+    volumes:
+      - postgres1_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
-    volumes:
-      - postgres_primary_data:/var/lib/postgresql/data
-      - ./docker/postgres/primary/init.sql:/docker-entrypoint-initdb.d/init.sql
-      - ./docker/postgres/primary/pg_hba.conf:/etc/postgresql/pg_hba.conf
-    command:
-      - postgres
-      - -c
-      - hba_file=/etc/postgresql/pg_hba.conf
-      - -c
-      - wal_level=replica
-      - -c
-      - max_wal_senders=10
-      - -c
-      - max_replication_slots=10
-      - -c
-      - hot_standby=on
-    healthcheck:
-      test:
-        - CMD-SHELL
-        - pg_isready -U ecommerce -d ecommerce
-      interval: 5s
-      timeout: 5s
-      retries: 10
-      start_period: 5s
-  postgres-replica1:
-    image: postgres:17
-    container_name: postgres-replica1
+      - "8001:8008"
+    depends_on:
+      - etcd1
+      - etcd2
+      - etcd3
+
+  postgres2:
+    build:
+      context: ./docker/patroni
+    container_name: postgres2
     environment:
-      PRIMARY_HOST: postgres-primary
-      PRIMARY_PORT: 5432
-      REPLICATION_USER: replicator
-      REPLICATION_PASSWORD: replicator_password
+      PATRONI_NAME: postgres2
+    volumes:
+      - postgres2_data:/var/lib/postgresql/data
     ports:
       - "5433:5432"
+      - "8002:8008"
     depends_on:
-      postgres-primary:
-        condition: service_healthy
-    volumes:
-      - postgres_replica1_data:/var/lib/postgresql/data
-      - ./docker/postgres/replica/entrypoint.sh:/replica-entrypoint.sh
-    entrypoint:
-      - /bin/bash
-      - /replica-entrypoint.sh
-  postgres-replica2:
-    image: postgres:17
-    container_name: postgres-replica2
+      - etcd1
+      - etcd2
+      - etcd3
+
+  postgres3:
+    build:
+      context: ./docker/patroni
+    container_name: postgres3
     environment:
-      PRIMARY_HOST: postgres-primary
-      PRIMARY_PORT: 5432
-      REPLICATION_USER: replicator
-      REPLICATION_PASSWORD: replicator_password
+      PATRONI_NAME: postgres3
+    volumes:
+      - postgres3_data:/var/lib/postgresql/data
     ports:
       - "5434:5432"
+      - "8003:8008"
     depends_on:
-      postgres-primary:
-        condition: service_healthy
-    volumes:
-      - postgres_replica2_data:/var/lib/postgresql/data
-      - ./docker/postgres/replica/entrypoint.sh:/replica-entrypoint.sh
-    entrypoint:
-      - /bin/bash
-      - /replica-entrypoint.sh
+      - etcd1
+      - etcd2
+      - etcd3
+
 volumes:
-  postgres_primary_data:
-  postgres_replica1_data:
-  postgres_replica2_data:
+  etcd1_data:
+  etcd2_data:
+  etcd3_data:
+
+  postgres1_data:
+  postgres2_data:
+  postgres3_data:

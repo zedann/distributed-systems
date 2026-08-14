@@ -5,6 +5,7 @@ RUN apt-get update \
         python3 \
         python3-pip \
         curl \
+        gosu \
     && pip3 install --break-system-packages \
         "patroni[etcd3]" \
         "psycopg[binary]" \
@@ -14,9 +15,6 @@ COPY patroni.yml /etc/patroni/patroni.yml.template
 COPY entrypoint.sh /entrypoint.sh
 
 RUN chmod +x /entrypoint.sh \
-    && chown postgres:postgres /etc/patroni/patroni.yml.template \
-    && chown postgres:postgres /entrypoint.sh
-
-USER postgres
+    && chown postgres:postgres /etc/patroni/patroni.yml.template
 
 ENTRYPOINT ["/entrypoint.sh"]

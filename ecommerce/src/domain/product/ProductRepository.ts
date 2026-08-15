@@ -1,4 +1,5 @@
 import { Product } from "./Product";
+export type ReadConsistency = "strong" | "eventual";
 
 export interface ProductRepository {
   save(product: Product): Promise<void>;

@@ -137,7 +137,7 @@ services:
     volumes:
       - .:/app
       - /app/node_modules
-    command: sh -lc "npm install && npm run dev"
+    command: sh -lc "npx prisma generate && npm run dev"
     depends_on:
       - haproxy
   pgbouncer-write:

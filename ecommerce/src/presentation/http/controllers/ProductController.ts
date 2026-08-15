@@ -2,7 +2,8 @@ import { Request, Response } from "express";
 
 import {
   createProduct,
-  getProducts
+  getProducts,
+  getProductById
 } from "../../../container";
 
 export class ProductController {
@@ -40,5 +41,15 @@ export class ProductController {
     const products = await getProducts.execute();
 
     res.json(products);
+  }
+
+  static async getById(
+    req: Request,
+    res: Response
+  ): Promise<void> {
+    const { id } = req.params;
+    const product = await getProductById.execute(id as string);
+
+    res.json(product);
   }
 }

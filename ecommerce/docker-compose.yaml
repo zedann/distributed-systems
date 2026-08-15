@@ -140,6 +140,27 @@ services:
     command: sh -lc "npm install && npm run dev"
     depends_on:
       - haproxy
+  pgbouncer-write:
+    image: edoburu/pgbouncer:latest
+    container_name: pgbouncer-write
+    volumes:
+      - ./docker/pgbouncer/pgbouncer-write.ini:/etc/pgbouncer/pgbouncer.ini:ro
+      - ./docker/pgbouncer/userlist.txt:/etc/pgbouncer/userlist.txt:ro
+    ports:
+      - "6432:6432"
+    depends_on:
+      - haproxy
+
+  pgbouncer-read:
+    image: edoburu/pgbouncer:latest
+    container_name: pgbouncer-read
+    volumes:
+      - ./docker/pgbouncer/pgbouncer-read.ini:/etc/pgbouncer/pgbouncer.ini:ro
+      - ./docker/pgbouncer/userlist.txt:/etc/pgbouncer/userlist.txt:ro
+    ports:
+      - "6433:6433"
+    depends_on:
+      - haproxy
 
 volumes:
   etcd1_data:

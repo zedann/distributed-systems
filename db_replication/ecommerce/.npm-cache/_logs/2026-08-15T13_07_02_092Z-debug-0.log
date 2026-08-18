@@ -1,0 +1,46 @@
+0 verbose cli /Users/countzedan/.nvm/versions/node/v22.15.1/bin/node /Users/countzedan/.nvm/versions/node/v22.15.1/bin/npm
+1 info using npm@11.5.2
+2 info using node@v22.15.1
+3 silly config load:file:/Users/countzedan/.nvm/versions/node/v22.15.1/lib/node_modules/npm/npmrc
+4 silly config load:file:/Users/countzedan/distributed-systems/db_replication/ecommerce/.npmrc
+5 silly config load:file:/Users/countzedan/.npmrc
+6 silly config load:file:/Users/countzedan/.nvm/versions/node/v22.15.1/etc/npmrc
+7 verbose title npm install @prisma/adapter-pg@7.9.1
+8 verbose argv "install" "--cache" "/Users/countzedan/distributed-systems/db_replication/ecommerce/.npm-cache" "@prisma/adapter-pg@7.9.1"
+9 verbose logfile logs-max:10 dir:/Users/countzedan/distributed-systems/db_replication/ecommerce/.npm-cache/_logs/2026-08-15T13_07_02_092Z-
+10 verbose logfile /Users/countzedan/distributed-systems/db_replication/ecommerce/.npm-cache/_logs/2026-08-15T13_07_02_092Z-debug-0.log
+11 silly logfile done cleaning log files
+12 silly packumentCache heap:2197815296 maxSize:549453824 maxEntrySize:274726912
+13 http fetch GET 403 https://registry.npmjs.org/npm 28ms
+14 silly idealTree buildDeps
+15 silly fetch manifest @prisma/adapter-pg@7.9.1
+16 silly packumentCache full:https://registry.npmjs.org/@prisma%2fadapter-pg cache-miss
+17 http fetch GET 403 https://registry.npmjs.org/@prisma%2fadapter-pg 9ms (cache skip)
+18 silly placeDep ROOT @prisma/adapter-pg@ OK for: ecommerce@1.0.0 want: 7.9.1
+19 verbose stack HttpErrorGeneral: 403 Forbidden - GET https://registry.npmjs.org/@prisma%2fadapter-pg
+19 verbose stack     at /Users/countzedan/.nvm/versions/node/v22.15.1/lib/node_modules/npm/node_modules/npm-registry-fetch/lib/check-response.js:103:15
+19 verbose stack     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+19 verbose stack     at async RegistryFetcher.packument (/Users/countzedan/.nvm/versions/node/v22.15.1/lib/node_modules/npm/node_modules/pacote/lib/registry.js:90:19)
+19 verbose stack     at async RegistryFetcher.manifest (/Users/countzedan/.nvm/versions/node/v22.15.1/lib/node_modules/npm/node_modules/pacote/lib/registry.js:128:23)
+19 verbose stack     at async #fetchManifest (/Users/countzedan/.nvm/versions/node/v22.15.1/lib/node_modules/npm/node_modules/@npmcli/arborist/lib/arborist/build-ideal-tree.js:1215:20)
+19 verbose stack     at async #nodeFromEdge (/Users/countzedan/.nvm/versions/node/v22.15.1/lib/node_modules/npm/node_modules/@npmcli/arborist/lib/arborist/build-ideal-tree.js:1053:19)
+19 verbose stack     at async #buildDepStep (/Users/countzedan/.nvm/versions/node/v22.15.1/lib/node_modules/npm/node_modules/@npmcli/arborist/lib/arborist/build-ideal-tree.js:917:11)
+19 verbose stack     at async Arborist.buildIdealTree (/Users/countzedan/.nvm/versions/node/v22.15.1/lib/node_modules/npm/node_modules/@npmcli/arborist/lib/arborist/build-ideal-tree.js:182:7)
+19 verbose stack     at async Promise.all (index 1)
+19 verbose stack     at async Arborist.reify (/Users/countzedan/.nvm/versions/node/v22.15.1/lib/node_modules/npm/node_modules/@npmcli/arborist/lib/arborist/reify.js:126:5)
+20 verbose statusCode 403
+21 verbose pkgid @prisma/adapter-pg@7.9.1
+22 error code E403
+23 error 403 403 Forbidden - GET https://registry.npmjs.org/@prisma%2fadapter-pg
+24 error 403 In most cases, you or one of your dependencies are requesting
+24 error 403 a package version that is forbidden by your security policy, or
+24 error 403 on a server you do not have access to.
+25 silly unfinished npm timer reify 1786799222462
+26 silly unfinished npm timer reify:loadTrees 1786799222463
+27 verbose cwd /Users/countzedan/distributed-systems/db_replication/ecommerce
+28 verbose os Darwin 24.6.0
+29 verbose node v22.15.1
+30 verbose npm  v11.5.2
+31 verbose exit 1
+32 verbose code 1
+33 error A complete log of this run can be found in: /Users/countzedan/distributed-systems/db_replication/ecommerce/.npm-cache/_logs/2026-08-15T13_07_02_092Z-debug-0.log

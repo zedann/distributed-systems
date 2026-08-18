@@ -1,0 +1,172 @@
+services:
+  # =========================================================
+  # ETCD
+  # =========================================================
+
+  etcd1:
+    image: quay.io/coreos/etcd:v3.5.18
+    container_name: etcd1
+    command:
+      - /usr/local/bin/etcd
+      - --name=etcd1
+      - --data-dir=/etcd-data
+      - --listen-client-urls=http://0.0.0.0:2379
+      - --advertise-client-urls=http://etcd1:2379
+      - --listen-peer-urls=http://0.0.0.0:2380
+      - --initial-advertise-peer-urls=http://etcd1:2380
+      - --initial-cluster=etcd1=http://etcd1:2380,etcd2=http://etcd2:2380,etcd3=http://etcd3:2380
+      - --initial-cluster-state=new
+      - --initial-cluster-token=ecommerce-etcd
+    volumes:
+      - etcd1_data:/etcd-data
+
+  etcd2:
+    image: quay.io/coreos/etcd:v3.5.18
+    container_name: etcd2
+    command:
+      - /usr/local/bin/etcd
+      - --name=etcd2
+      - --data-dir=/etcd-data
+      - --listen-client-urls=http://0.0.0.0:2379
+      - --advertise-client-urls=http://etcd2:2379
+      - --listen-peer-urls=http://0.0.0.0:2380
+      - --initial-advertise-peer-urls=http://etcd2:2380
+      - --initial-cluster=etcd1=http://etcd1:2380,etcd2=http://etcd2:2380,etcd3=http://etcd3:2380
+      - --initial-cluster-state=new
+      - --initial-cluster-token=ecommerce-etcd
+    volumes:
+      - etcd2_data:/etcd-data
+
+  etcd3:
+    image: quay.io/coreos/etcd:v3.5.18
+    container_name: etcd3
+    command:
+      - /usr/local/bin/etcd
+      - --name=etcd3
+      - --data-dir=/etcd-data
+      - --listen-client-urls=http://0.0.0.0:2379
+      - --advertise-client-urls=http://etcd3:2379
+      - --listen-peer-urls=http://0.0.0.0:2380
+      - --initial-advertise-peer-urls=http://etcd3:2380
+      - --initial-cluster=etcd1=http://etcd1:2380,etcd2=http://etcd2:2380,etcd3=http://etcd3:2380
+      - --initial-cluster-state=new
+      - --initial-cluster-token=ecommerce-etcd
+    volumes:
+      - etcd3_data:/etcd-data
+
+  # =========================================================
+  # POSTGRESQL + PATRONI
+  # =========================================================
+
+  postgres1:
+    build:
+      context: ./docker/patroni
+    container_name: postgres1
+    environment:
+      PATRONI_NAME: postgres1
+    volumes:
+      - postgres1_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+      - "8001:8008"
+    depends_on:
+      - etcd1
+      - etcd2
+      - etcd3
+
+  postgres2:
+    build:
+      context: ./docker/patroni
+    container_name: postgres2
+    environment:
+      PATRONI_NAME: postgres2
+    volumes:
+      - postgres2_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+      - "8002:8008"
+    depends_on:
+      - etcd1
+      - etcd2
+      - etcd3
+
+  postgres3:
+    build:
+      context: ./docker/patroni
+    container_name: postgres3
+    environment:
+      PATRONI_NAME: postgres3
+    volumes:
+      - postgres3_data:/var/lib/postgresql/data
+    ports:
+      - "5434:5432"
+      - "8003:8008"
+    depends_on:
+      - etcd1
+      - etcd2
+      - etcd3
+
+    # =========================================================
+    # HAPROXY
+    # =========================================================
+  haproxy:
+    image: haproxy:3.2
+    container_name: haproxy
+    volumes:
+      - ./docker/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    ports:
+      - "5435:5432"
+      - "5436:5433"
+    depends_on:
+      - postgres1
+      - postgres2
+      - postgres3
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ecommerce-app
+    working_dir: /app
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: development
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: sh -lc "npx prisma generate && npm run dev"
+    depends_on:
+      - haproxy
+  pgbouncer-write:
+    image: edoburu/pgbouncer:latest
+    container_name: pgbouncer-write
+    volumes:
+      - ./docker/pgbouncer/pgbouncer-write.ini:/etc/pgbouncer/pgbouncer.ini:ro
+      - ./docker/pgbouncer/userlist.txt:/etc/pgbouncer/userlist.txt:ro
+    ports:
+      - "6432:6432"
+    depends_on:
+      - haproxy
+
+  pgbouncer-read:
+    image: edoburu/pgbouncer:latest
+    container_name: pgbouncer-read
+    volumes:
+      - ./docker/pgbouncer/pgbouncer-read.ini:/etc/pgbouncer/pgbouncer.ini:ro
+      - ./docker/pgbouncer/userlist.txt:/etc/pgbouncer/userlist.txt:ro
+    ports:
+      - "6433:6433"
+    depends_on:
+      - haproxy
+
+volumes:
+  etcd1_data:
+  etcd2_data:
+  etcd3_data:
+
+  postgres1_data:
+  postgres2_data:
+  postgres3_data:

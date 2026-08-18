@@ -51,3 +51,8 @@ path.join(process.cwd(), "src/generated/libquery_engine-linux-musl-arm64-openssl
  * 
  */
 export type Product = Prisma.ProductModel
+/**
+ * Model Order
+ * 
+ */
+export type Order = Prisma.OrderModel

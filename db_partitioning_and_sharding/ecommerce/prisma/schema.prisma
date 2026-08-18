@@ -20,3 +20,23 @@ model Product {
   @@index([name])
   @@map("products")
 }
+
+model Order {
+  id        String      @default(uuid())
+  userId    String
+  total     Decimal     @db.Decimal(10, 2)
+  status    OrderStatus
+  createdAt DateTime    @default(now())
+
+  @@id([id, createdAt])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("orders")
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  CANCELLED
+  COMPLETED
+}
